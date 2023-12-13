@@ -7,69 +7,100 @@
                     <input type="text" class="form-control" id="search" formControlName="search"/>
                 </div>
             </div>
+            <div class="col-md-3 mt-4">
+              <div class="form-group">
+                <button type="button" class="btn btn-primary" (click)="showAddNewForm()">Add Employee</button>
+              </div>
+            </div>
         </div>
     </form>
 
-    <table class="table table-bordered mt-3">
+    <form *ngIf="isAddNewMode" [formGroup]="newEmployeeForm" class="mt-3">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="newEmployeeName">Name:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="newEmployeeName"
+              formControlName="name"
+              [ngClass]="{ 'is-invalid': newEmployeeName?.invalid && (newEmployeeName?.dirty || newEmployeeName?.touched) }"/>
+            <div class="invalid-feedback" *ngIf="newEmployeeName?.invalid && (newEmployeeName?.dirty || newEmployeeName?.touched)">
+              Name is required.
+            </div>
+          </div>
+      
+          <div class="form-group">
+            <label for="newEmployeePosition">Position:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="newEmployeePosition"
+              formControlName="position"
+              [ngClass]="{ 'is-invalid': newEmployeePosition?.invalid && (newEmployeePosition?.dirty || newEmployeePosition?.touched) }"/>
+            <div class="invalid-feedback" *ngIf="newEmployeePosition?.invalid && (newEmployeePosition?.dirty || newEmployeePosition?.touched)">
+              Position is required.
+            </div>
+          </div>
+      
+          <div class="form-group">
+            <label for="newEmployeeSalary">Salary:</label>
+            <input
+              type="number"
+              class="form-control"
+              id="newEmployeeSalary"
+              formControlName="salary"
+              [ngClass]="{ 'is-invalid': newEmployeeSalary?.invalid && (newEmployeeSalary?.dirty || newEmployeeSalary?.touched) }"
+            />
+            <div class="invalid-feedback" *ngIf="newEmployeeSalary?.invalid && (newEmployeeSalary?.dirty || newEmployeeSalary?.touched)">
+              Salary is required and must be greater than 0.
+            </div>
+          </div> 
+          <div class="form-group mt-3">
+            <button type="button" class="btn btn-success mr-3" (click)="addEmployee()">Save</button>
+            <button type="button" class="btn btn-danger" (click)="hideAddNewForm()">No</button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <table class="table mt-3 employees-table">
       <thead>
         <tr>
           <th>ID</th>
           <th>Name</th>
           <th>Position</th>
           <th>Salary</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let employee of employees | async" (click)="goToDetails(employee?.id)" style="cursor: pointer">
-          <td>{{ employee.id }}</td>
-          <td>{{ employee.name }}</td>
-          <td>{{ employee.position }}</td>
-          <td>{{ employee.salary | currency }}</td>
-        </tr>
+        <ng-container *ngFor="let employee of employees let i = index">
+            <tr (click)="goToDetails(employee?.id)" style="cursor: pointer !important" (mouseover)="showActions(i)" (mouseleave)="hideActions()">
+            <td>{{ employee.id }}</td>
+            <ng-container *ngIf="editingIndex !== i; else editMode">
+                <td>{{ employee.name }}</td>
+                <td>{{ employee.position }}</td>
+                <td>{{ employee.salary | currency }}</td>
+            </ng-container>
+            <ng-template #editMode>
+                <td><input class="form-control" [(ngModel)]="employee.name" /></td>
+                <td><input class="form-control" [(ngModel)]="employee.position" /></td>
+                <td><input class="form-control" [(ngModel)]="employee.salary" /></td>
+            </ng-template>
+            <td>
+                <ng-container *ngIf="isActionsVisible && !isEditMode && currentIndex === i">
+                  <a (click)="enableEditMode(i)"><i class="edit-employee-icon fa fa-edit" style="color: #c0ca33;"></i></a>
+                  <a (click)="deleteEmployee(i)"><i class="edit-employee-icon fa fa-trash" style="color: #e53935;"></i></a>
+                </ng-container>
+                <ng-container *ngIf="isEditMode && currentIndex === i">
+                  <a (click)="editEmployee(i)"><i class="edit-employee-icon fa fa-check" style="color: #1de9b6"></i></a>
+                  <a (click)="disableEditMode()"><i class="edit-employee-icon fa fa-remove"></i></a>
+                </ng-container>
+            </td>
+            </tr>
+        </ng-container>
       </tbody>
     </table>
-  
-    <form [formGroup]="employeeForm" class="mt-3">
-      <div class="form-group">
-        <label for="name">Name:</label>
-        <input
-          type="text"
-          class="form-control"
-          id="name"
-          formControlName="name"
-          [ngClass]="{ 'is-invalid': employeeName?.invalid && (employeeName?.dirty || employeeName?.touched) }"/>
-        <div class="invalid-feedback" *ngIf="employeeName?.invalid && (employeeName?.dirty || employeeName?.touched)">
-          Name is required.
-        </div>
-      </div>
-  
-      <div class="form-group">
-        <label for="position">Position:</label>
-        <input
-          type="text"
-          class="form-control"
-          id="position"
-          formControlName="position"
-          [ngClass]="{ 'is-invalid': employeePosition?.invalid && (employeePosition?.dirty || employeePosition?.touched) }"/>
-        <div class="invalid-feedback" *ngIf="employeePosition?.invalid && (employeePosition?.dirty || employeePosition?.touched)">
-          Position is required.
-        </div>
-      </div>
-  
-      <div class="form-group">
-        <label for="salary">Salary:</label>
-        <input
-          type="number"
-          class="form-control"
-          id="salary"
-          formControlName="salary"
-          [ngClass]="{ 'is-invalid': employeeSalary?.invalid && (employeeSalary?.dirty || employeeSalary?.touched) }"
-        />
-        <div class="invalid-feedback" *ngIf="employeeSalary?.invalid && (employeeSalary?.dirty || employeeSalary?.touched)">
-          Salary is required and must be greater than or equal to 0.
-        </div>
-      </div>
-  
-      <button type="button" class="btn btn-primary" (click)="addEmployee()">Add Employee</button>
-    </form>
   </div>

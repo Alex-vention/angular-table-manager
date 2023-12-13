@@ -12,11 +12,19 @@ export class EmployeesService {
     constructor(private http: HttpClient) {}
 
     getEmployees(): Observable<Employee[]> {
-        return this.http.get<Employee[]>(this.apiUrl + 'employees');
+        return this.http.get<Employee[]>(`${this.apiUrl}employees`);
     }
 
     addEmployee(employee: Employee): Observable<Employee> {
-        return this.http.post<Employee>(this.apiUrl + 'employees', employee);
+        return this.http.post<Employee>(`${this.apiUrl}employees`, employee);
+    }
+
+    editEmployee(id: number, updatedEmployee: Employee): Observable<Employee> {
+        return this.http.put<Employee>(`${this.apiUrl}employees/${id}`, updatedEmployee);
+    }
+
+    deleteEmployee(id: number): Observable<Employee> {
+        return this.http.delete<Employee>(`${this.apiUrl}employees/${id}`);
     }
 
     filterEmployees(employees: Employee[], filter: string): Employee[] {

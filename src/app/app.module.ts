@@ -7,10 +7,11 @@ import { EmployeesComponent } from './employees/employees.component';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
     declarations: [AppComponent, EmployeesComponent],
-    imports: [BrowserModule, AppRoutingModule, HttpClientModule, RouterModule, ReactiveFormsModule],
+    imports: [BrowserModule, AppRoutingModule, HttpClientModule, RouterModule, ReactiveFormsModule, FormsModule],
     providers: [],
     bootstrap: [AppComponent],
 })

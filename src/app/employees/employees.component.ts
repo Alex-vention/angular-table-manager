@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Employee } from '../models/employee';
 import { EmployeesService } from '../services/employees.service';
-import { Observable, debounceTime, map } from 'rxjs';
+import { debounceTime } from 'rxjs';
 
 @Component({
     selector: 'employees',
@@ -11,9 +11,15 @@ import { Observable, debounceTime, map } from 'rxjs';
     styleUrl: './employees.component.css',
 })
 export class EmployeesComponent {
-    employees: Observable<Employee[]> | undefined;
+    employees: Employee[] = [];
     searchForm: FormGroup;
-    employeeForm: FormGroup;
+    newEmployeeForm: FormGroup;
+
+    isActionsVisible: boolean = false;
+    isEditMode: boolean = false;
+    isAddNewMode: boolean = false;
+    currentIndex: number | null = null;
+    editingIndex: number = -1;
 
     constructor(
         private router: Router,
@@ -24,18 +30,25 @@ export class EmployeesComponent {
             search: [''],
         });
 
-        this.employeeForm = this.fb.group({
+        this.newEmployeeForm = this.fb.group({
             name: ['', Validators.required],
             position: ['', Validators.required],
-            salary: [0, [Validators.required, Validators.min(0)]],
+            salary: [0, [Validators.required, Validators.min(1)]],
         });
     }
 
     ngOnInit(): void {
-      this.employees = this.employeesService.getEmployees();
+        this.loadEmployees();
 
-        this.searchForm.get('search')?.valueChanges.pipe(debounceTime(500)).subscribe((value) => {
-          this.applyFilter(value);
+        this.searchForm.get('search')?.valueChanges.pipe(debounceTime(500))
+            .subscribe((value) => {
+                this.applyFilter(value);
+            });
+    }
+
+    loadEmployees(): void {
+        this.employeesService.getEmployees().subscribe((data) => {
+            this.employees = data;
         });
     }
 
@@ -44,30 +57,94 @@ export class EmployeesComponent {
     }
 
     applyFilter(filterValue: string): void {
-      this.employees = this.employeesService.getEmployees().pipe(
-        map((employees) => this.employeesService.filterEmployees(employees, filterValue))
-      );
+        this.loadEmployees();
+        this.employees = this.employeesService.filterEmployees(
+            this.employees,
+            filterValue
+        );
     }
 
-    get employeeName() {
-        return this.employeeForm.get('name');
+    enableEditMode(index: number) {
+        this.editingIndex = index;
+        this.isEditMode = true;
     }
 
-    get employeePosition() {
-        return this.employeeForm.get('position');
+    disableEditMode() {
+        this.editingIndex = -1;
+        this.isEditMode = false;
     }
 
-    get employeeSalary() {
-        return this.employeeForm.get('salary');
+    showAddNewForm(): void {
+      this.isAddNewMode = true;
+    }
+
+    hideAddNewForm(): void {
+      this.isAddNewMode = false;
+      this.newEmployeeForm.reset();
     }
 
     addEmployee(): void {
-        if (this.employeeForm.valid) {
-            const newEmployee: Employee = this.employeeForm.value as Employee;
+      this.newEmployeeForm.markAllAsTouched();
+        if (this.newEmployeeForm.valid) {
+            const newEmployee: Employee = this.newEmployeeForm.value as Employee;
             this.employeesService.addEmployee(newEmployee).subscribe(() => {
-                this.employees = this.employeesService.getEmployees();
-                this.employeeForm.reset();
+                this.loadEmployees();
+                this.hideAddNewForm();
             });
         }
+    }
+
+    editEmployee(index: number): void {
+        const editedEmployee = this.employees[index];
+        this.employeesService
+            .editEmployee(editedEmployee.id, editedEmployee)
+            .subscribe(() => {
+                this.loadEmployees();
+                this.disableEditMode();
+            });
+    }
+
+    deleteEmployee(index: number): void {
+        const employeeToDelete = this.employees[index];
+
+        if (employeeToDelete) {
+            const confirmDelete = confirm(
+                `Are you sure you want to delete ${employeeToDelete.name}?`
+            );
+
+            if (confirmDelete) {
+                this.employeesService
+                    .deleteEmployee(employeeToDelete.id)
+                    .subscribe(() => {
+                        this.loadEmployees();
+                    });
+            }
+        }
+    }
+
+    showActions(rowIndex: number) {
+        if (!this.isEditMode) {
+            this.isActionsVisible = true;
+            this.currentIndex = rowIndex;
+        }
+    }
+
+    hideActions() {
+        if (!this.isEditMode) {
+            this.isActionsVisible = false;
+            this.currentIndex = null;
+        }
+    }
+
+    get newEmployeeName() {
+        return this.newEmployeeForm.get('name');
+    }
+
+    get newEmployeePosition() {
+        return this.newEmployeeForm.get('position');
+    }
+
+    get newEmployeeSalary() {
+        return this.newEmployeeForm.get('salary');
     }
 }
