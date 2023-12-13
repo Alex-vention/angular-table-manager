@@ -1,0 +1,17 @@
+<div class="container mt-4">
+    <h2 class="mb-4">{{ employee?.name }}</h2>
+  
+    <div class="row">
+      <div class="col-md-2">
+        <img *ngIf="employee?.details?.photo" [src]="employee?.details?.photo" alt="Employee Photo" class="img-fluid rounded">
+      </div>
+  
+      <div class="col-md-8">
+        <p><strong>Position:</strong> {{ employee?.position }}</p>
+        <p><strong>Salary:</strong> {{ employee?.salary | currency }}</p>
+        <p><strong>Email:</strong> {{ employee?.details?.email }}</p>
+        <p><strong>Phone:</strong> {{ employee?.details?.phone }}</p>
+        <p><strong>Address:</strong> {{ employee?.details?.address }}</p>
+      </div>
+    </div>
+  </div>

@@ -1,16 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Employee } from '../models/employee';
 import { EmployeesService } from '../services/employees.service';
-import { debounceTime } from 'rxjs';
+import { Subject, debounceTime, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'employees',
     templateUrl: './employees.component.html',
     styleUrl: './employees.component.css',
 })
-export class EmployeesComponent {
+export class EmployeesComponent implements OnInit, OnDestroy {
     employees: Employee[] = [];
     searchForm: FormGroup;
     newEmployeeForm: FormGroup;
@@ -20,6 +20,8 @@ export class EmployeesComponent {
     isAddNewMode: boolean = false;
     currentIndex: number | null = null;
     editingIndex: number = -1;
+
+    private destroy$ = new Subject<void>();
 
     constructor(
         private router: Router,
@@ -40,20 +42,24 @@ export class EmployeesComponent {
     ngOnInit(): void {
         this.loadEmployees();
 
-        this.searchForm.get('search')?.valueChanges.pipe(debounceTime(500))
+        this.searchForm.get('search')?.valueChanges.pipe(debounceTime(500), takeUntil(this.destroy$))
             .subscribe((value) => {
                 this.applyFilter(value);
             });
     }
 
     loadEmployees(): void {
-        this.employeesService.getEmployees().subscribe((data) => {
+        this.employeesService.getEmployees().pipe(
+            takeUntil(this.destroy$)
+        ).subscribe((data) => {
             this.employees = data;
         });
     }
 
     goToDetails(employeeId?: number): void {
-        this.router.navigate(['/details', employeeId]);
+        if (employeeId) {
+            this.router.navigate(['/employee', employeeId]);
+        }
     }
 
     applyFilter(filterValue: string): void {
@@ -87,7 +93,9 @@ export class EmployeesComponent {
       this.newEmployeeForm.markAllAsTouched();
         if (this.newEmployeeForm.valid) {
             const newEmployee: Employee = this.newEmployeeForm.value as Employee;
-            this.employeesService.addEmployee(newEmployee).subscribe(() => {
+            this.employeesService.addEmployee(newEmployee).pipe(
+                takeUntil(this.destroy$)
+            ).subscribe(() => {
                 this.loadEmployees();
                 this.hideAddNewForm();
             });
@@ -96,12 +104,12 @@ export class EmployeesComponent {
 
     editEmployee(index: number): void {
         const editedEmployee = this.employees[index];
-        this.employeesService
-            .editEmployee(editedEmployee.id, editedEmployee)
-            .subscribe(() => {
-                this.loadEmployees();
-                this.disableEditMode();
-            });
+        this.employeesService.editEmployee(editedEmployee.id, editedEmployee).pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(() => {
+            this.loadEmployees();
+            this.disableEditMode();
+        });
     }
 
     deleteEmployee(index: number): void {
@@ -113,11 +121,11 @@ export class EmployeesComponent {
             );
 
             if (confirmDelete) {
-                this.employeesService
-                    .deleteEmployee(employeeToDelete.id)
-                    .subscribe(() => {
-                        this.loadEmployees();
-                    });
+                this.employeesService.deleteEmployee(employeeToDelete.id).pipe(
+                    takeUntil(this.destroy$)
+                ).subscribe(() => {
+                    this.loadEmployees();
+                });
             }
         }
     }
@@ -146,5 +154,10 @@ export class EmployeesComponent {
 
     get newEmployeeSalary() {
         return this.newEmployeeForm.get('salary');
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 }

@@ -8,9 +8,10 @@ import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { EmployeeDetailsComponent } from './employees/employee-details/employee-details.component';
 
 @NgModule({
-    declarations: [AppComponent, EmployeesComponent],
+    declarations: [AppComponent, EmployeesComponent, EmployeeDetailsComponent],
     imports: [BrowserModule, AppRoutingModule, HttpClientModule, RouterModule, ReactiveFormsModule, FormsModule],
     providers: [],
     bootstrap: [AppComponent],
