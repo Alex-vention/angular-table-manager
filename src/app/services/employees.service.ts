@@ -11,7 +11,7 @@ export class EmployeesService {
 
     constructor(private http: HttpClient) {}
 
-    getEmployeeById(id: string): Observable<Employee> {
+    getEmployeeById(id: number): Observable<Employee> {
         return this.http.get<Employee>(`${this.apiUrl}employees/${id}`);
     }
 
@@ -33,11 +33,17 @@ export class EmployeesService {
 
     filterEmployees(employees: Employee[], filter: string): Employee[] {
         if (!filter) {
-            return employees;
+          return employees;
         }
-
+      
+        const lowercaseFilter = filter.toLowerCase();
+      
         return employees.filter((employee) => {
-            return employee.name.toLowerCase().includes(filter.toLowerCase());
+          const matchesName = employee.name.toLowerCase().includes(lowercaseFilter);
+          const matchesPosition = employee.position.toLowerCase().includes(lowercaseFilter);
+          const matchesSalary = employee.salary.toString().includes(filter);
+      
+          return matchesName || matchesPosition || matchesSalary;
         });
-    }
+      }
 }

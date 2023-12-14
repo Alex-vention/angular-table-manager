@@ -1,15 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Employee } from '../../models/employee';
 import { ActivatedRoute } from '@angular/router';
 import { EmployeesService } from '../../services/employees.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'employee-details',
     templateUrl: './employee-details.component.html',
     styleUrl: './employee-details.component.css',
 })
-export class EmployeeDetailsComponent {
+export class EmployeeDetailsComponent implements OnDestroy {
     employee: Employee | undefined;
+
+    private destroy$ = new Subject<void>();
 
     constructor(
         private route: ActivatedRoute,
@@ -18,14 +21,29 @@ export class EmployeeDetailsComponent {
 
     ngOnInit(): void {
         this.route.paramMap.subscribe((params) => {
-            const employeeId = params.get('id');
+            const employeeId = +params.get('id')!;
 
-            if (employeeId) {
-                this.employeesService.getEmployeeById(employeeId)
-                    .subscribe((employee) => {
-                        this.employee = employee;
-                    });
+            if (!isNaN(employeeId)) {
+                this.fetchEmployeeDetails(employeeId);
             }
         });
+    }
+
+    private fetchEmployeeDetails(employeeId: number): void {
+        this.employeesService.getEmployeeById(employeeId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(
+                (employee) => {
+                    this.employee = employee;
+                },
+                (error) => {
+                    console.error('Error fetching employee details:', error);
+                }
+            );
+    }
+
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 }

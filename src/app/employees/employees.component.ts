@@ -21,6 +21,9 @@ export class EmployeesComponent implements OnInit, OnDestroy {
     currentIndex: number | null = null;
     editingIndex: number = -1;
 
+    sortedColumn: string | null = null;
+    sortDirection: 'asc' | 'desc' = 'asc';
+
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -63,11 +66,11 @@ export class EmployeesComponent implements OnInit, OnDestroy {
     }
 
     applyFilter(filterValue: string): void {
-        this.loadEmployees();
-        this.employees = this.employeesService.filterEmployees(
-            this.employees,
-            filterValue
-        );
+        this.employeesService.getEmployees().pipe(
+            takeUntil(this.destroy$)
+        ).subscribe((data) => {
+            this.employees = this.employeesService.filterEmployees(data, filterValue);
+        });
     }
 
     enableEditMode(index: number) {
@@ -88,6 +91,26 @@ export class EmployeesComponent implements OnInit, OnDestroy {
       this.isAddNewMode = false;
       this.newEmployeeForm.reset();
     }
+
+    sortTable(column: keyof Employee): void {
+        if (this.sortedColumn === column) {
+          this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          this.sortedColumn = column;
+          this.sortDirection = 'asc';
+        }
+      
+        this.employees.sort((a, b) => {
+          const aValue = a[column];
+          const bValue = b[column];
+      
+          if (typeof aValue === 'string' && typeof bValue === 'string') {
+            return this.sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+          }
+      
+          return this.sortDirection === 'asc' ? Number(aValue) - Number(bValue) : Number(bValue) - Number(aValue);
+        });
+      }
 
     addEmployee(): void {
       this.newEmployeeForm.markAllAsTouched();

@@ -68,10 +68,10 @@
     <table class="table mt-3 employees-table">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Position</th>
-          <th>Salary</th>
+          <th (click)="sortTable('id')">ID <i *ngIf="sortedColumn === 'id'" [class]="sortDirection"></i></th>
+          <th (click)="sortTable('name')">Name <i *ngIf="sortedColumn === 'name'" [class]="sortDirection"></i></th>
+          <th (click)="sortTable('position')">Position <i *ngIf="sortedColumn === 'position'" [class]="sortDirection"></i></th>
+          <th (click)="sortTable('salary')">Salary <i *ngIf="sortedColumn === 'salary'" [class]="sortDirection"></i></th>
           <th></th>
         </tr>
       </thead>
@@ -85,18 +85,18 @@
                 <td>{{ employee.salary | currency }}</td>
             </ng-container>
             <ng-template #editMode>
-                <td><input class="form-control" [(ngModel)]="employee.name" /></td>
-                <td><input class="form-control" [(ngModel)]="employee.position" /></td>
-                <td><input class="form-control" [(ngModel)]="employee.salary" /></td>
+                <td><input class="form-control" [(ngModel)]="employee.name" (click)="$event.stopPropagation()"/></td>
+                <td><input class="form-control" [(ngModel)]="employee.position" (click)="$event.stopPropagation()"/></td>
+                <td><input class="form-control" [(ngModel)]="employee.salary" (click)="$event.stopPropagation()"/></td>
             </ng-template>
             <td>
                 <ng-container *ngIf="isActionsVisible && !isEditMode && currentIndex === i">
-                  <a (click)="enableEditMode(i)"><i class="edit-employee-icon fa fa-edit" style="color: #c0ca33;"></i></a>
-                  <a (click)="deleteEmployee(i)"><i class="edit-employee-icon fa fa-trash" style="color: #e53935;"></i></a>
+                  <a (click)="enableEditMode(i); $event.stopPropagation();"><i class="edit-employee-icon fa fa-edit" style="color: #c0ca33;"></i></a>
+                  <a (click)="deleteEmployee(i); $event.stopPropagation();"><i class="edit-employee-icon fa fa-trash" style="color: #e53935;"></i></a>
                 </ng-container>
                 <ng-container *ngIf="isEditMode && currentIndex === i">
-                  <a (click)="editEmployee(i)"><i class="edit-employee-icon fa fa-check" style="color: #1de9b6"></i></a>
-                  <a (click)="disableEditMode()"><i class="edit-employee-icon fa fa-remove"></i></a>
+                  <a (click)="editEmployee(i); $event.stopPropagation();"><i class="edit-employee-icon fa fa-check" style="color: #1de9b6"></i></a>
+                  <a (click)="disableEditMode(); $event.stopPropagation();"><i class="edit-employee-icon fa fa-remove"></i></a>
                 </ng-container>
             </td>
             </tr>
