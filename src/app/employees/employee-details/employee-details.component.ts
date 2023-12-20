@@ -20,26 +20,28 @@ export class EmployeeDetailsComponent implements OnDestroy {
     ) {}
 
     ngOnInit(): void {
-        this.route.paramMap.subscribe((params) => {
-            const employeeId = +params.get('id')!;
+        this.route.paramMap
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((params) => {
+                const employeeId = +params.get('id')!;
 
-            if (!isNaN(employeeId)) {
-                this.fetchEmployeeDetails(employeeId);
-            }
-        });
+                if (!isNaN(employeeId)) {
+                    this.fetchEmployeeDetails(employeeId);
+                }
+            });
     }
 
     private fetchEmployeeDetails(employeeId: number): void {
         this.employeesService.getEmployeeById(employeeId)
             .pipe(takeUntil(this.destroy$))
-            .subscribe(
-                (employee) => {
-                    this.employee = employee;
+            .subscribe({
+                next: (employee) => {
+                  this.employee = employee;
                 },
-                (error) => {
-                    console.error('Error fetching employee details:', error);
+                error: (error) => {
+                  console.error('Error fetching employee details:', error);
                 }
-            );
+            });
     }
 
     ngOnDestroy(): void {

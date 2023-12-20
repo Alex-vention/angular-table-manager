@@ -24,3 +24,15 @@ i {
 .desc::before {
     content: "\25BC";
 }
+
+.fa-edit{
+    color: #c0ca33;
+}
+
+.fa-trash{
+    color: #e53935; 
+}
+
+.fa-check{
+    color: #1de9b6
+}

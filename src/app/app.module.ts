@@ -8,11 +8,12 @@ import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { EmployeeDetailsComponent } from './employees/employee-details/employee-details.component';
+import { EmployeeDetailsModule } from './employees/employee-details/employee-details.module';
+import { StopPropagationDirective } from './directivies/stop-propagation.directive';
 
 @NgModule({
-    declarations: [AppComponent, EmployeesComponent, EmployeeDetailsComponent],
-    imports: [BrowserModule, AppRoutingModule, HttpClientModule, RouterModule, ReactiveFormsModule, FormsModule],
+    declarations: [AppComponent, EmployeesComponent, StopPropagationDirective],
+    imports: [BrowserModule, AppRoutingModule, HttpClientModule, RouterModule, ReactiveFormsModule, FormsModule, EmployeeDetailsModule],
     providers: [],
     bootstrap: [AppComponent],
 })

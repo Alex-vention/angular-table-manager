@@ -3,8 +3,8 @@
         <div class="row">
             <div class="col-md-3">
                 <div class="form-group">
-                    <label for="search">Search:</label>
-                    <input type="text" class="form-control" id="search" formControlName="search"/>
+                    <label for="search-employee">Search:</label>
+                    <input type="text" class="form-control" id="search-employe" formControlName="search"/>
                 </div>
             </div>
             <div class="col-md-3 mt-4">
@@ -25,8 +25,8 @@
               class="form-control"
               id="newEmployeeName"
               formControlName="name"
-              [ngClass]="{ 'is-invalid': newEmployeeName?.invalid && (newEmployeeName?.dirty || newEmployeeName?.touched) }"/>
-            <div class="invalid-feedback" *ngIf="newEmployeeName?.invalid && (newEmployeeName?.dirty || newEmployeeName?.touched)">
+              [ngClass]="{ 'is-invalid': isFormInvalid(newEmployeeName) }"/>
+            <div class="invalid-feedback" *ngIf="isFormInvalid(newEmployeeName)">
               Name is required.
             </div>
           </div>
@@ -38,8 +38,8 @@
               class="form-control"
               id="newEmployeePosition"
               formControlName="position"
-              [ngClass]="{ 'is-invalid': newEmployeePosition?.invalid && (newEmployeePosition?.dirty || newEmployeePosition?.touched) }"/>
-            <div class="invalid-feedback" *ngIf="newEmployeePosition?.invalid && (newEmployeePosition?.dirty || newEmployeePosition?.touched)">
+              [ngClass]="{ 'is-invalid': isFormInvalid(newEmployeePosition) }"/>
+            <div class="invalid-feedback" *ngIf="isFormInvalid(newEmployeePosition)">
               Position is required.
             </div>
           </div>
@@ -51,9 +51,9 @@
               class="form-control"
               id="newEmployeeSalary"
               formControlName="salary"
-              [ngClass]="{ 'is-invalid': newEmployeeSalary?.invalid && (newEmployeeSalary?.dirty || newEmployeeSalary?.touched) }"
+              [ngClass]="{ 'is-invalid': isFormInvalid(newEmployeeSalary) }"
             />
-            <div class="invalid-feedback" *ngIf="newEmployeeSalary?.invalid && (newEmployeeSalary?.dirty || newEmployeeSalary?.touched)">
+            <div class="invalid-feedback" *ngIf="isFormInvalid(newEmployeeSalary)">
               Salary is required and must be greater than 0.
             </div>
           </div> 
@@ -85,18 +85,18 @@
                 <td>{{ employee.salary | currency }}</td>
             </ng-container>
             <ng-template #editMode>
-                <td><input class="form-control" [(ngModel)]="employee.name" (click)="$event.stopPropagation()"/></td>
-                <td><input class="form-control" [(ngModel)]="employee.position" (click)="$event.stopPropagation()"/></td>
-                <td><input class="form-control" [(ngModel)]="employee.salary" (click)="$event.stopPropagation()"/></td>
+                <td><input stopPropagation  class="form-control" [(ngModel)]="employee.name"/></td>
+                <td><input stopPropagation class="form-control" [(ngModel)]="employee.position"/></td>
+                <td><input stopPropagation class="form-control" [(ngModel)]="employee.salary"/></td>
             </ng-template>
             <td>
                 <ng-container *ngIf="isActionsVisible && !isEditMode && currentIndex === i">
-                  <a (click)="enableEditMode(i); $event.stopPropagation();"><i class="edit-employee-icon fa fa-edit" style="color: #c0ca33;"></i></a>
-                  <a (click)="deleteEmployee(i); $event.stopPropagation();"><i class="edit-employee-icon fa fa-trash" style="color: #e53935;"></i></a>
+                  <a stopPropagation (click)="enableEditMode(i);"><i class="edit-employee-icon fa fa-edit"></i></a>
+                  <a stopPropagation (click)="deleteEmployee(i);"><i class="edit-employee-icon fa fa-trash"></i></a>
                 </ng-container>
                 <ng-container *ngIf="isEditMode && currentIndex === i">
-                  <a (click)="editEmployee(i); $event.stopPropagation();"><i class="edit-employee-icon fa fa-check" style="color: #1de9b6"></i></a>
-                  <a (click)="disableEditMode(); $event.stopPropagation();"><i class="edit-employee-icon fa fa-remove"></i></a>
+                  <a stopPropagation (click)="editEmployee(i);"><i class="edit-employee-icon fa fa-check"></i></a>
+                  <a stopPropagation (click)="disableEditMode();"><i class="edit-employee-icon fa fa-remove"></i></a>
                 </ng-container>
             </td>
             </tr>
@@ -104,3 +104,5 @@
       </tbody>
     </table>
   </div>
+  <!-- todo how should it be displayed? -->
+  <router-outlet></router-outlet>

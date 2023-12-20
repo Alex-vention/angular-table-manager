@@ -1,4 +1,9 @@
 {
+  "singleQuote": true,
   "tabWidth": 4,
-  "useTabs": false
+  "useTabs": false,
+  "printWidth": 150,
+  "bracketSpacing": true,
+  "arrowParens": "avoid",
+  "endOfLine": "auto" 
 }
